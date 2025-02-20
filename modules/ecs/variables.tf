@@ -1,0 +1,12 @@
+variable "cluster_name" {}
+variable "project_name" {}
+variable "vpc_id" {}
+variable "ecr_repo_url" {}
+variable "container_port" {}
+variable "host_port" {}
+variable "service_name" {}
+variable "public_subnet1_id" {}
+variable "public_subnet2_id" {}
+variable "alb_tg_arn" {}
+variable "ecs_sg_id" {}
+variable "sports_api_key" {}

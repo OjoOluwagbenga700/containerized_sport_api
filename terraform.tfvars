@@ -1,0 +1,13 @@
+region               = "us-east-1"
+project_name         = "game-day-schedule"
+vpc_cidr             = "10.0.0.0/16"
+public_subnet1_cidr  = "10.0.1.0/24"
+public_subnet2_cidr  = "10.0.2.0/24"
+private_subnet1_cidr = "10.0.3.0/24"
+private_subnet2_cidr = "10.0.4.0/24"
+repository_name      = "sports-api"
+cluster_name         = "sports-api-cluster"
+container_port       = 8080
+host_port            = 8080
+service_name         = "sports-api-service"
+sports_api_key       = "your_api_key"

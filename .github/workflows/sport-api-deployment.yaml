@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-
+  AWS_REGION: us-east-1
   TERRAFORM_WORKING_DIR: ./terraform
   
 

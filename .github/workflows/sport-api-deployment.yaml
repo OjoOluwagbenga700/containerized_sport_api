@@ -1,4 +1,4 @@
-name: ECS Application Deployment
+name: sport-api-deployment
 on:
   push:
     branches:

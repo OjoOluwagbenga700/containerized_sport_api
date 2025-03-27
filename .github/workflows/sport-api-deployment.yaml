@@ -1,0 +1,113 @@
+name: ECS Application Deployment
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+
+  TERRAFORM_WORKING_DIR: ./terraform
+  
+
+jobs:
+  tflint:
+    name: Terraform Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.4
+      
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.50.0
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Initialize TFLint
+        run: tflint --init
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Run TFLint
+        run: tflint --recursive
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+
+  terraform-plan:
+    name: Terraform Plan
+    needs: tflint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.4
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+
+  deploy:
+    name: Deploy Infrastructure
+    needs: 
+      - tflint
+      - terraform-plan
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.4
+      
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}

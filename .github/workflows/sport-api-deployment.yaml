@@ -13,7 +13,7 @@ env:
   
 
 jobs:
-  tfvalidate:
+  tflint:
     name: Terraform Validation
     runs-on: ubuntu-latest
     steps:
@@ -24,6 +24,11 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.7.4
+      
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.50.0
       
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -36,9 +41,17 @@ jobs:
         run: terraform fmt -check -recursive
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
       
+      - name: Initialize TFLint
+        run: tflint --init
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+      
+      - name: Run TFLint
+        run: tflint --recursive
+        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
+
   terraform-plan:
     name: Terraform Plan
-    needs: tfvalidate
+    needs: tflint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -71,7 +84,7 @@ jobs:
   deploy:
     name: Deploy Infrastructure
     needs: 
-      - tfvalidate
+      - tflint
       - terraform-plan
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest

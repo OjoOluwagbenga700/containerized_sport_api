@@ -1,4 +1,4 @@
-name: sport-api-deployment1
+name: sport-api-deployment
 on:
   push:
     branches:

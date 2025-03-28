@@ -1,47 +1,28 @@
-name: sport-api-deployment
+name: Destroy Infrastructure
+
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      confirm_destroy:
+        description: 'Type "CONFIRM" to destroy infrastructure'
+        required: true
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: us-east-1  
   TERRAFORM_WORKING_DIR: ./terraform
-  
 
 jobs:
-  tffmt:
-    name: Terraform Validation
+  destroy-infrastructure:
+    name: Destroy AWS Infrastructure
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Validate Destruction Confirmation
+        if: github.event.inputs.confirm_destroy != 'CONFIRM'
+        run: |
+          echo "Destruction not confirmed. Please type 'CONFIRM' to proceed."
+          exit 1
       
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.4
-      
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Terraform Format Check
-        run: terraform fmt -check -recursive
-        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
-      
-
-  terraform-plan:
-    name: Terraform Plan
-    needs: tffmt
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
       
@@ -61,41 +42,12 @@ jobs:
         run: terraform init
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
       
-      - name: Terraform Validate
-        run: terraform validate
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
       
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
-
-  deploy:
-    name: Deploy Infrastructure
-    needs: 
-      - tffmt
-      - terraform-plan
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.7.4
-      
-      - name: Terraform Init
-        run: terraform init
-        working-directory: ${{ env.TERRAFORM_WORKING_DIR }}
-      
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+      - name: Cleanup Terraform State
+        run: |
+          terraform state list
+          terraform state pull
         working-directory: ${{ env.TERRAFORM_WORKING_DIR }}

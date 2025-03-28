@@ -1,6 +1,6 @@
 variable "project_name" {
-    type = string
+  type = string
 }
 variable "alb_dns_endpoint" {
-    type = string
+  type = string
 }

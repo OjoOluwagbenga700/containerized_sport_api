@@ -35,11 +35,11 @@ resource "aws_iam_role_policy_attachment" "ecs_task_execution_role_policy" {
 resource "aws_ecs_task_definition" "ecs_task_def" {
   family                   = "sports-api-task"
   requires_compatibilities = ["FARGATE"]
-  network_mode            = "awsvpc"
-  cpu                     = 256
-  memory                  = 512
-  execution_role_arn      = aws_iam_role.ecs_task_execution_role.arn
-  task_role_arn          = aws_iam_role.ecs_task_execution_role.arn
+  network_mode             = "awsvpc"
+  cpu                      = 256
+  memory                   = 512
+  execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_execution_role.arn
 
   container_definitions = jsonencode([
     {
@@ -69,11 +69,11 @@ resource "aws_ecs_service" "ecs_service" {
   task_definition = aws_ecs_task_definition.ecs_task_def.arn
   desired_count   = 2
   launch_type     = "FARGATE"
-  
+
 
   network_configuration {
     subnets          = [var.public_subnet1_id, var.public_subnet2_id]
-    security_groups = [var.ecs_sg_id]
+    security_groups  = [var.ecs_sg_id]
     assign_public_ip = true
   }
 
@@ -87,5 +87,5 @@ resource "aws_ecs_service" "ecs_service" {
     container_name   = "sports-api-container"
     container_port   = var.container_port
   }
-  
+
 }

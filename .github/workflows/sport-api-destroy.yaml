@@ -9,7 +9,7 @@ on:
 
 env:
   AWS_REGION: us-east-1  
-  TERRAFORM_WORKING_DIR: .
+  TERRAFORM_WORKING_DIR: ./terraform
 
 jobs:
   destroy-infrastructure:

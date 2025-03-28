@@ -1,6 +1,16 @@
-variable "project_name" {}
-variable "public_subnet1_id" {}
-variable "alb_sg_id" {}
-variable "vpc_id" {}
-variable "public_subnet2_id" {}
+variable "project_name" {
+    type = string
+}
+variable "public_subnet1_id" {
+    type = string
+}
+variable "alb_sg_id" {
+    type = string
+}
+variable "vpc_id" {
+    type = string
+}
+variable "public_subnet2_id" {
+    type = string
+}
 

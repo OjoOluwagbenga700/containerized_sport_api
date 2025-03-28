@@ -1,2 +1,6 @@
-variable "project_name" {}
-variable "alb_dns_endpoint" {}
+variable "project_name" {
+    type = string
+}
+variable "alb_dns_endpoint" {
+    type = string
+}

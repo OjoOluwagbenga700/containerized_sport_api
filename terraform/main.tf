@@ -18,15 +18,15 @@ module "alb" {
   public_subnet2_id = module.networking.public_subnet2_id
   alb_sg_id         = module.networking.alb_sg_id
   vpc_id            = module.networking.vpc_id
-  depends_on = [ module.networking ]
+  depends_on        = [module.networking]
 }
 
 module "api-gateway" {
   source           = "./modules/api-gateway"
   project_name     = var.project_name
   alb_dns_endpoint = module.alb.alb_dns_endpoint
-  depends_on = [module.alb]
-  
+  depends_on       = [module.alb]
+
 }
 
 

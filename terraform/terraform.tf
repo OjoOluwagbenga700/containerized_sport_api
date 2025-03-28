@@ -1,11 +1,8 @@
 terraform {
-  required_version = "~> 1.7.4"
-
-
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 4.0"
+      version = "5.93.0"
     }
 
     docker = {
